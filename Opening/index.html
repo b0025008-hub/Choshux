@@ -17,25 +17,35 @@
 
     body {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       justify-content: center;
       align-items: center;
       background-color: #08080a;
       color: #f5f5f7;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       position: relative;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* 背景のスタイリッシュなグラデーション光 */
     .bg-glow {
       position: absolute;
-      width: 500px;
-      height: 500px;
+      width: min(500px, 90vw);
+      height: min(500px, 90vw);
       background: radial-gradient(circle, rgba(50, 100, 255, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
       border-radius: 50%;
       pointer-events: none;
       animation: pulse 8s ease-in-out infinite alternate;
+      transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bg-glow.expanded {
+      width: min(700px, 120vw);
+      height: min(700px, 120vw);
+      background: radial-gradient(circle, rgba(70, 130, 255, 0.22) 0%, rgba(0, 0, 0, 0) 75%);
     }
 
     /* 微細なグリッドパターン（奥行き感の演出） */
@@ -55,9 +65,13 @@
     .container {
       position: relative;
       text-align: center;
-      padding: 24px;
+      padding: 32px 20px;
       z-index: 1;
       max-width: 90vw;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     /* サブタイトル・タグ */
@@ -74,13 +88,14 @@
       margin-bottom: 24px;
       background: rgba(255, 255, 255, 0.02);
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       opacity: 0;
       animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
     }
 
     /* メインタイトル */
     .title {
-      font-size: clamp(2.2rem, 7vw, 4.8rem);
+      font-size: clamp(2rem, 6.5vw, 4.8rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       line-height: 1.15;
@@ -99,6 +114,128 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
       margin: 28px auto 0;
       animation: expandLine 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards 1s;
+    }
+
+    /* アクションエリア（ボタン & メッセージ） */
+    .action-area {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 1.3s;
+      width: 100%;
+    }
+
+    /* ENTERボタン */
+    .enter-btn {
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-indent: 0.28em; /* 文字間隔による右寄りの補正 */
+      padding: 14px 40px;
+      min-height: 48px;
+      border-radius: 9999px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.4s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      outline: none;
+    }
+
+    @media (hover: hover) {
+      .enter-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow:
+          0 0 30px rgba(70, 130, 255, 0.35),
+          0 6px 24px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+    }
+
+    .enter-btn:active {
+      transform: translateY(1px) scale(0.98);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow:
+        0 0 20px rgba(70, 130, 255, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .enter-btn:focus-visible {
+      border-color: rgba(100, 170, 255, 0.9);
+      box-shadow: 0 0 0 3px rgba(100, 170, 255, 0.4);
+    }
+
+    /* ボタンがクリックされた後の状態 */
+    .enter-btn.active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(100, 160, 255, 0.5);
+      box-shadow:
+        0 0 25px rgba(80, 140, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    /* メッセージコンテナ */
+    .message-container {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .message-container.visible {
+      grid-template-rows: 1fr;
+    }
+
+    .message-content {
+      overflow: hidden;
+    }
+
+    /* 「Welcome to our world.」メッセージ本体 */
+    .welcome-message {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+      filter: blur(8px);
+      margin-top: 28px;
+      padding: 12px 16px;
+      transition:
+        opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .message-container.visible .welcome-message {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    .message-text {
+      font-size: clamp(1.15rem, 3.6vw, 1.8rem);
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      line-height: 1.4;
+      background: linear-gradient(180deg, #ffffff 40%, rgba(200, 220, 255, 0.85) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(100, 160, 255, 0.3);
     }
 
     /* キーフレームアニメーション */
@@ -151,18 +288,88 @@
         opacity: 1;
       }
     }
+
+    /* スマートフォン向け微調整 */
+    @media (max-width: 480px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      .badge {
+        margin-bottom: 20px;
+        padding: 5px 14px;
+      }
+
+      .divider {
+        margin: 20px auto 0;
+      }
+
+      .action-area {
+        margin-top: 32px;
+      }
+
+      .enter-btn {
+        padding: 12px 34px;
+        letter-spacing: 0.22em;
+        text-indent: 0.22em;
+      }
+
+      .welcome-message {
+        margin-top: 20px;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div class="bg-glow"></div>
+  <div class="bg-glow" id="bgGlow"></div>
   <div class="bg-grid"></div>
 
   <main class="container">
     <span class="badge">Official Portal</span>
     <h1 class="title">Welcome to Choshux!</h1>
     <div class="divider"></div>
+
+    <div class="action-area">
+      <button id="enterBtn" class="enter-btn" type="button" aria-expanded="false" aria-controls="messageContainer">
+        ENTER
+      </button>
+
+      <div id="messageContainer" class="message-container" aria-live="polite">
+        <div class="message-content">
+          <div class="welcome-message">
+            <p class="message-text">Welcome to our world.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const enterBtn = document.getElementById("enterBtn");
+      const messageContainer = document.getElementById("messageContainer");
+      const bgGlow = document.getElementById("bgGlow");
+
+      if (!enterBtn || !messageContainer) return;
+
+      enterBtn.addEventListener("click", () => {
+        const isVisible = messageContainer.classList.contains("visible");
+
+        if (!isVisible) {
+          // メッセージを滑らかに表示
+          messageContainer.classList.add("visible");
+          enterBtn.classList.add("active");
+          enterBtn.setAttribute("aria-expanded", "true");
+
+          // 背景の光を広げる演出
+          if (bgGlow) {
+            bgGlow.classList.add("expanded");
+          }
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
